@@ -8,6 +8,7 @@ class IntumitProjectApplication {
 
     static void main(String[] args) {
         SpringApplication.run(IntumitProjectApplication, args)
+        System.out.print("--------------test--------------")
     }
 
 }
