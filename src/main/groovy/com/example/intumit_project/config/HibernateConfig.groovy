@@ -1,21 +1,29 @@
 package com.example.intumit_project.config
 
 import org.hibernate.SessionFactory
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean
+import org.springframework.jdbc.datasource.DriverManagerDataSource
 import javax.sql.DataSource
 
 @Configuration
 class HibernateConfig {
-    @Autowired
-    DataSource dataSource
+
+    @Bean
+    DataSource dataSource() {
+        def dataSource = new DriverManagerDataSource()
+        dataSource.driverClassName = "com.mysql.cj.jdbc.Driver"
+        dataSource.url = "jdbc:mysql://localhost:3306/implement"
+        dataSource.username = "yuwei"
+        dataSource.password = "tp6m4jo3"
+        dataSource
+    }
 
     @Bean
     LocalSessionFactoryBean sessionFactory() {
         def sessionFactory = new LocalSessionFactoryBean()
-        sessionFactory.dataSource = dataSource
+        sessionFactory.dataSource = dataSource()
         sessionFactory.packagesToScan = ["com.example.intumit_project.model"]
         sessionFactory.hibernateProperties = hibernateProperties()
         sessionFactory
