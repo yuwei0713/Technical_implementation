@@ -40,7 +40,7 @@ public class AnnouncementController {
 
     @PostMapping("/insert")
     String insert(@ModelAttribute Announcement announcement,
-                  @RequestParam("attachments") MultipartFile[] attachments,
+                  @RequestParam(value = "attachments", required = false) MultipartFile[] attachments,
                   Model model) {
         // 先保存公告（不含附件）
         announcementRepository.save(announcement);
@@ -58,7 +58,7 @@ public class AnnouncementController {
                         Path filePath = uploadPath.resolve(fileName);
                         Files.copy(attachment.getInputStream(), filePath);
 
-                        // 創建 Attachment 實體並關聯到公告
+                        // 創建並保存 Attachment
                         Attachment attach = new Attachment();
                         attach.setFileName(fileName);
                         attach.setFilePath("/uploads/" + fileName);
@@ -86,7 +86,7 @@ public class AnnouncementController {
 
     @PostMapping("/Update")
     String update(@ModelAttribute Announcement announcement,
-                  @RequestParam("attachments") MultipartFile[] attachments,
+                  @RequestParam(value = "attachments", required = false) MultipartFile[] attachments,
                   Model model) {
         // 更新公告基本資訊
         announcementRepository.save(announcement);
