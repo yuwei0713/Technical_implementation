@@ -57,7 +57,7 @@ class AnnouncementController {
             announcementService.saveAnnouncement(announcement, uploadFiles, deleteAttachments)
             "redirect:/index"
         } catch (Exception e) {
-            model.addAttribute("error", "檔案上傳失敗")
+            model.addAttribute("error", "檔案上傳失敗: ${e.message}")
             "errorPage"
         }
     }

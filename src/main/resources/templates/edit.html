@@ -20,11 +20,11 @@
     </div>
     <div class="mb-3">
       <label for="publishDate" class="form-label">發佈日期</label>
-      <input type="date" class="form-control" id="publishDate" name="publishDate" th:value="${announcement.publishDate}" required>
+      <input type="date" class="form-control" id="publishDate" name="publishDate" th:value="${#dates.format(announcement.publishDate, 'yyyy-MM-dd')}" required>
     </div>
     <div class="mb-3">
       <label for="deadline" class="form-label">截止日期</label>
-      <input type="date" class="form-control" id="deadline" name="deadline" th:value="${announcement.deadline}" required>
+      <input type="date" class="form-control" id="deadline" name="deadline" th:value="${#dates.format(announcement.deadline, 'yyyy-MM-dd')}" required>
     </div>
     <div class="mb-3">
       <label for="content" class="form-label">公布內容</label>
@@ -32,10 +32,13 @@
     </div>
     <div class="mb-3">
       <label class="form-label">已有附件</label>
-      <div th:each="attachment : ${announcement.attachments}">
-        <input type="checkbox" name="deleteAttachments" th:value="${attachment.id}" />
-        <span th:text="${attachment.fileName}"></span>
+      <div id="attachmentList">
+        <div th:each="attachment : ${announcement.attachments}" th:id="'attachment-' + ${attachment.id}" class="attachment-item">
+          <span th:text="${attachment.fileName}"></span>
+          <button type="button" class="btn btn-danger btn-sm ms-2" th:onclick="'removeAttachment(' + ${attachment.id} + ')'">X</button>
+        </div>
       </div>
+      <input type="hidden" name="deleteAttachments" id="deleteAttachments" value="">
     </div>
     <div class="mb-3">
       <label for="uploadFiles" class="form-label">上傳新附件（可選，可多選）</label>
@@ -51,6 +54,21 @@
   window.onload = function() {
       CKEDITOR.replace('content');
   };
+
+  // 儲存要刪除的附件 ID
+  let deletedAttachmentIds = [];
+
+  function removeAttachment(attachmentId) {
+      // 從畫面移除附件
+      const attachmentElement = document.getElementById('attachment-' + attachmentId);
+      if (attachmentElement) {
+          attachmentElement.remove();
+      }
+
+      // 添加到 deleteAttachments 列表
+      deletedAttachmentIds.push(attachmentId);
+      document.getElementById('deleteAttachments').value = deletedAttachmentIds.join(',');
+  }
 </script>
 </body>
 </html>

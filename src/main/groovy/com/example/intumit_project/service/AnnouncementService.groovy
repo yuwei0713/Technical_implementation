@@ -31,7 +31,7 @@ class AnnouncementService {
             attachmentsToDelete.each { attachmentId ->
                 def attachment = attachmentRepository.findById(attachmentId)
                 if (attachment && attachment.announcement.id == announcement.id) {
-                    Path filePath = Paths.get(UPLOAD_DIR + attachment.fileName)
+                    Path filePath = Paths.get("/var" + attachment.fileName)
                     if (Files.exists(filePath)) {
                         Files.delete(filePath)
                     }
