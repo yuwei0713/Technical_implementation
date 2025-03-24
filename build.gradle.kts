@@ -1,5 +1,5 @@
 plugins {
-    groovy
+    id("groovy")
     id("org.springframework.boot") version "3.4.3"
     id("io.spring.dependency-management") version "1.1.7"
 }
@@ -18,14 +18,27 @@ repositories {
 }
 
 dependencies {
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("org.springframework.boot:spring-boot-starter-validation")
+    // Spring Boot 核心依賴
     implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.apache.groovy:groovy")
-    implementation("org.springframework.session:spring-session-core")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
+    implementation("org.springframework.session:spring-session-core")
+
+    // Groovy 支援
+    implementation("org.apache.groovy:groovy:4.0.23")
+
+    // Hibernate 核心依賴（替換 spring-boot-starter-data-jpa）
+    implementation("org.hibernate:hibernate-core:6.6.1.Final")
+    implementation("org.springframework:spring-orm:6.1.14")
+    implementation("jakarta.persistence:jakarta.persistence-api:3.1.0")
+
+    // MySQL 驅動
+    runtimeOnly("com.mysql:mysql-connector-j:8.4.0")
+
+    // 開發工具
     developmentOnly("org.springframework.boot:spring-boot-devtools")
-    runtimeOnly("com.mysql:mysql-connector-j")
+
+    // 測試依賴
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }

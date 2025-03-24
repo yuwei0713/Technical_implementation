@@ -1,7 +1,9 @@
-package com.example.intumit_project.repository;
+package com.example.intumit_project.repository
 
-import com.example.intumit_project.model.Attachment;
-import org.springframework.data.jpa.repository.JpaRepository;
+import com.example.intumit_project.model.Attachment
 
-public interface AttachmentRepository extends JpaRepository<Attachment, Long> {
+interface AttachmentRepository {
+    Attachment findById(Long id)
+    Attachment save(Attachment attachment)
+    void deleteById(Long id)
 }

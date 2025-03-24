@@ -1,9 +1,10 @@
-package com.example.intumit_project.repository;
+package com.example.intumit_project.repository
 
-import com.example.intumit_project.model.Announcement;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import com.example.intumit_project.model.Announcement
 
-@Repository
-public interface AnnouncementRepository extends JpaRepository<Announcement, Long> {
+interface AnnouncementRepository {
+    List<Announcement> findAll()
+    Announcement findById(Long id)
+    Announcement save(Announcement announcement)
+    void deleteById(Long id)
 }
