@@ -25,8 +25,25 @@ class AnnouncementService {
     private static final String UPLOAD_DIR = "/var/uploads/"
 
     @Transactional
-    void saveAnnouncement(Announcement announcement, MultipartFile[] uploadFiles) {
+    void saveAnnouncement(Announcement announcement, MultipartFile[] uploadFiles, List<Long> attachmentsToDelete = []) {
+        // 先處理要刪除的舊附件（如果前端有傳入要刪除的附件 ID 列表）
+        if (attachmentsToDelete) {
+            attachmentsToDelete.each { attachmentId ->
+                def attachment = attachmentRepository.findById(attachmentId)
+                if (attachment && attachment.announcement.id == announcement.id) {
+                    Path filePath = Paths.get(UPLOAD_DIR + attachment.fileName)
+                    if (Files.exists(filePath)) {
+                        Files.delete(filePath)
+                    }
+                    attachmentRepository.deleteById(attachmentId)
+                }
+            }
+        }
+
+        // 更新公告（不含附件）
         announcementRepository.save(announcement)
+
+        // 處理新上傳的檔案
         if (uploadFiles != null && uploadFiles.length > 0) {
             Path uploadPath = Paths.get(UPLOAD_DIR)
             if (!Files.exists(uploadPath)) {
@@ -52,18 +69,18 @@ class AnnouncementService {
 
     @Transactional
     void deleteAnnouncement(Long id) {
-        announcementRepository.deleteById(id)
-    }
-
-    @Transactional
-    void deleteAttachment(Long attachmentId) {
-        Attachment attachment = attachmentRepository.findById(attachmentId)
-        if (attachment) {
-            Path filePath = Paths.get(UPLOAD_DIR + attachment.fileName)
-            if (Files.exists(filePath)) {
-                Files.delete(filePath)
+        def announcement = announcementRepository.findById(id)
+        if (announcement) {
+            // 刪除所有相關附件（包括伺服器上的檔案）
+            announcement.attachments.each { attachment ->
+                Path filePath = Paths.get(UPLOAD_DIR + attachment.fileName)
+                if (Files.exists(filePath)) {
+                    Files.delete(filePath)
+                }
+                attachmentRepository.deleteById(attachment.id)
             }
-            attachmentRepository.deleteById(attachmentId)
+            // 刪除公告
+            announcementRepository.deleteById(id)
         }
     }
 

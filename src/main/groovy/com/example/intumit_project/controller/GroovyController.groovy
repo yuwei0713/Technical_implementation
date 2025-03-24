@@ -47,9 +47,10 @@ class AnnouncementController {
     @PostMapping("/Update")
     String update(@ModelAttribute Announcement announcement,
                   @RequestParam(value = "uploadFiles", required = false) MultipartFile[] uploadFiles,
+                  @RequestParam(value = "deleteAttachments", required = false) List<Long> deleteAttachments,
                   Model model) {
         try {
-            announcementService.saveAnnouncement(announcement, uploadFiles)
+            announcementService.saveAnnouncement(announcement, uploadFiles, deleteAttachments)
             "redirect:/index"
         } catch (Exception e) {
             model.addAttribute("error", "檔案上傳失敗")
@@ -61,16 +62,5 @@ class AnnouncementController {
     String delete(@RequestParam("id") Long id) {
         announcementService.deleteAnnouncement(id)
         "redirect:/index"
-    }
-
-    @PostMapping("/deleteAttachment/{attachmentId}")
-    String deleteAttachment(@PathVariable("attachmentId") Long attachmentId) {
-        announcementService.deleteAttachment(attachmentId)
-        def attachment = announcementService.attachmentRepository.findById(attachmentId)
-        if (attachment) {
-            "redirect:/edit/${attachment.announcement.id}"
-        } else {
-            "redirect:/index"
-        }
     }
 }
