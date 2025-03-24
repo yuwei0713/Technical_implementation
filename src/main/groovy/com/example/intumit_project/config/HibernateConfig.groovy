@@ -31,7 +31,6 @@ class HibernateConfig {
     }
 
     @Bean
-    @Autowired
     org.springframework.orm.hibernate5.HibernateTransactionManager transactionManager(SessionFactory sessionFactory) {
         def txManager = new org.springframework.orm.hibernate5.HibernateTransactionManager()
         txManager.sessionFactory = sessionFactory
