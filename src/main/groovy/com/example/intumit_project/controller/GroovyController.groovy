@@ -94,7 +94,7 @@ public class AnnouncementController {
 
     // 刪除公告
     @PostMapping("/Delete")
-    String delete(@PathVariable("id") Long id, Model model) {
+    String delete(@RequestParam("id") Long id, Model model) {
         announcementRepository.deleteById(id); // 根據 ID 刪除
         return "redirect:/index";
     }
