@@ -15,13 +15,14 @@ public class AnnouncementService {
     @Autowired
     private AttachmentRepository attachmentRepository;
 
-    // 刪除單個附件的邏輯
+    private static final String UPLOAD_DIR = "/var/uploads/";
+
     public void deleteAttachment(Long attachmentId) {
         Attachment attachment = attachmentRepository.findById(attachmentId)
                 .orElseThrow(() -> new IllegalArgumentException("無效的附件 ID: " + attachmentId));
 
         // 刪除伺服器上的檔案
-        Path filePath = Paths.get("src/main/resources/static" + attachment.getFilePath());
+        Path filePath = Paths.get(UPLOAD_DIR + attachment.getFileName());
         try {
             if (Files.exists(filePath)) {
                 Files.delete(filePath);

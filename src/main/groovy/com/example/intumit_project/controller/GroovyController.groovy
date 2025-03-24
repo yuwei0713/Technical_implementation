@@ -28,7 +28,9 @@ public class AnnouncementController {
     @Autowired
     private AnnouncementService announcementService;
 
-    // 顯示首頁並列出所有公告
+    // 上傳目錄設為外部路徑
+    private static final String UPLOAD_DIR = "/var/uploads/";
+
     @GetMapping("/index")
     String showIndex(Model model) {
         List<Announcement> announcements = announcementRepository.findAll();
@@ -36,28 +38,26 @@ public class AnnouncementController {
         return "index";
     }
 
-    // 新增公告
     @PostMapping("/insert")
     String insert(@ModelAttribute Announcement announcement,
                   @RequestParam("attachments") MultipartFile[] attachments,
                   Model model) {
-        announcementRepository.save(announcement); // 先保存公告
+        announcementRepository.save(announcement);
 
         if (attachments != null && attachments.length > 0) {
-            String uploadDir = "src/main/resources/static/uploads/";
-            Path uploadPath = Paths.get(uploadDir);
+            Path uploadPath = Paths.get(UPLOAD_DIR);
             try {
                 if (!Files.exists(uploadPath)) {
                     Files.createDirectories(uploadPath);
                 }
                 for (MultipartFile attachment : attachments) {
                     if (!attachment.isEmpty()) {
-                        String fileName = attachment.getOriginalFilename();
+                        String fileName = System.currentTimeMillis() + "_" + attachment.getOriginalFilename(); // 避免檔案名衝突
                         Path filePath = uploadPath.resolve(fileName);
                         Files.copy(attachment.getInputStream(), filePath);
                         Attachment attach = new Attachment();
                         attach.setFileName(fileName);
-                        attach.setFilePath("/uploads/" + fileName);
+                        attach.setFilePath("/uploads/" + fileName); // URL 路徑仍以 /uploads 開頭
                         attach.setAnnouncement(announcement);
                         attachmentRepository.save(attach);
                         announcement.getAttachments().add(attach);
@@ -72,7 +72,6 @@ public class AnnouncementController {
         return "redirect:/index";
     }
 
-    // 顯示編輯表單
     @GetMapping("/edit/{id}")
     String showEditForm(@PathVariable("id") Long id, Model model) {
         Announcement announcement = announcementRepository.findById(id)
@@ -81,21 +80,19 @@ public class AnnouncementController {
         return "edit";
     }
 
-    // 更新公告
     @PostMapping("/Update")
     String update(@ModelAttribute Announcement announcement,
                   @RequestParam("attachments") MultipartFile[] attachments,
                   Model model) {
         if (attachments != null && attachments.length > 0) {
-            String uploadDir = "src/main/resources/static/uploads/";
-            Path uploadPath = Paths.get(uploadDir);
+            Path uploadPath = Paths.get(UPLOAD_DIR);
             try {
                 if (!Files.exists(uploadPath)) {
                     Files.createDirectories(uploadPath);
                 }
                 for (MultipartFile attachment : attachments) {
                     if (!attachment.isEmpty()) {
-                        String fileName = attachment.getOriginalFilename();
+                        String fileName = System.currentTimeMillis() + "_" + attachment.getOriginalFilename();
                         Path filePath = uploadPath.resolve(fileName);
                         Files.copy(attachment.getInputStream(), filePath);
                         Attachment attach = new Attachment();
@@ -112,23 +109,21 @@ public class AnnouncementController {
                 return "errorPage";
             }
         }
-        announcementRepository.save(announcement); // 更新公告
+        announcementRepository.save(announcement);
         return "redirect:/index";
     }
 
-    // 刪除公告
     @PostMapping("/Delete")
     String delete(@RequestParam("id") Long id, Model model) {
-        announcementRepository.deleteById(id); // 根據 ID 刪除公告及其附件（因 CASCADE）
+        announcementRepository.deleteById(id);
         return "redirect:/index";
     }
 
-    // 刪除單個附件
     @PostMapping("/deleteAttachment/{attachmentId}")
     String deleteAttachment(@PathVariable("attachmentId") Long attachmentId) {
-        announcementService.deleteAttachment(attachmentId); // 呼叫 Service 刪除附件
+        announcementService.deleteAttachment(attachmentId);
         return "redirect:/edit/" + attachmentRepository.findById(attachmentId)
                 .map(att -> att.getAnnouncement().getId())
-                .orElse(0L); // 返回編輯頁面
+                .orElse(0L);
     }
 }
