@@ -20,11 +20,11 @@
     </div>
     <div class="mb-3">
       <label for="publishDate" class="form-label">發佈日期</label>
-      <input type="date" class="form-control" id="publishDate" name="publishDate" th:value="${#dates.format(announcement.publishDate, 'yyyy-MM-dd')}" required>
+      <input type="date" class="form-control" id="publishDate" name="publishDate" th:value="${announcement.publishDate}" required>
     </div>
     <div class="mb-3">
       <label for="deadline" class="form-label">截止日期</label>
-      <input type="date" class="form-control" id="deadline" name="deadline" th:value="${#dates.format(announcement.deadline, 'yyyy-MM-dd')}" required>
+      <input type="date" class="form-control" id="deadline" name="deadline" th:value="${announcement.deadline}" required>
     </div>
     <div class="mb-3">
       <label for="content" class="form-label">公布內容</label>
@@ -38,8 +38,7 @@
           <button type="button" class="btn btn-danger btn-sm ms-2" th:onclick="'removeAttachment(' + ${attachment.id} + ')'">X</button>
         </div>
       </div>
-      <input type="hidden" name="deleteAttachments" id="deleteAttachments" value="">
-    </div>
+      <input type="hidden" name="deleteAttachments" id="deleteAttachments" value="">    </div>
     <div class="mb-3">
       <label for="uploadFiles" class="form-label">上傳新附件（可選，可多選）</label>
       <input type="file" class="form-control" id="uploadFiles" name="uploadFiles" multiple>
