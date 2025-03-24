@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
+import org.springframework.transaction.annotation.Transactional
 
 @Controller
 class AnnouncementController {
@@ -35,6 +36,7 @@ class AnnouncementController {
     }
 
     @GetMapping("/edit/{id}")
+    @Transactional(readOnly = true)
     String showEditForm(@PathVariable("id") Long id, Model model) {
         def announcement = announcementService.findAnnouncementById(id)
         println "Announcement: ${announcement}"
