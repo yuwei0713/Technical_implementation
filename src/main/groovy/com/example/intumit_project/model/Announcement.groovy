@@ -2,6 +2,8 @@ package com.example.intumit_project.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "announcement")
@@ -26,8 +28,8 @@ public class Announcement {
     @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    @Column(name = "attachment_path")
-    private String attachmentPath;
+    @OneToMany(mappedBy = "announcement", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Attachment> attachments = new ArrayList<>();
 
     // Getter 和 Setter
     public Long getId() { return id; }
@@ -42,6 +44,6 @@ public class Announcement {
     public void setDeadline(LocalDate deadline) { this.deadline = deadline; }
     public String getContent() { return content; }
     public void setContent(String content) { this.content = content; }
-    public String getAttachmentPath() { return attachmentPath; }
-    public void setAttachmentPath(String attachmentPath) { this.attachmentPath = attachmentPath; }
+    public List<Attachment> getAttachments() { return attachments; }
+    public void setAttachments(List<Attachment> attachments) { this.attachments = attachments; }
 }
