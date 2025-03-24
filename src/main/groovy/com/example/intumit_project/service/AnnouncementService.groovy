@@ -25,26 +25,40 @@ class AnnouncementService {
     private static final String UPLOAD_DIR = "/var/uploads/"
 
     @Transactional
-    void saveAnnouncement(Announcement announcement, MultipartFile[] uploadFiles, List<Long> attachmentsToDelete = []) {
-        // 先處理要刪除的舊附件（如果前端有傳入要刪除的附件 ID 列表）
+    void saveAnnouncement(Announcement formAnnouncement, MultipartFile[] uploadFiles, List<Long> attachmentsToDelete = []) {
+        // 從資料庫加載現有實體
+        def existingAnnouncement = announcementRepository.findById(formAnnouncement.id)
+        if (!existingAnnouncement) {
+            throw new IllegalArgumentException("公告 ID ${formAnnouncement.id} 不存在")
+        }
+
+        // 合併表單資料到現有實體
+        existingAnnouncement.title = formAnnouncement.title
+        existingAnnouncement.publisher = formAnnouncement.publisher
+        existingAnnouncement.publishDate = formAnnouncement.publishDate
+        existingAnnouncement.deadline = formAnnouncement.deadline
+        existingAnnouncement.content = formAnnouncement.content
+
+        // 刪除舊附件
         if (attachmentsToDelete) {
             attachmentsToDelete.each { attachmentId ->
                 def attachment = attachmentRepository.findById(attachmentId)
-                if (attachment && attachment.announcement.id == announcement.id) {
-                    Path filePath = Paths.get("/var" + attachment.fileName)
+                if (attachment && attachment.announcement.id == existingAnnouncement.id) {
+                    Path filePath = Paths.get(UPLOAD_DIR + attachment.fileName)
                     if (Files.exists(filePath)) {
                         Files.delete(filePath)
                     }
                     attachmentRepository.deleteById(attachmentId)
+                    existingAnnouncement.attachments.removeAll { it.id == attachmentId }
                 }
             }
         }
 
-        // 更新公告（不含附件）
-        announcementRepository.save(announcement)
+        // 更新公告
+        announcementRepository.save(existingAnnouncement)
 
-        // 處理新上傳的檔案
-        if (uploadFiles != null && uploadFiles.length > 0) {
+        // 處理新上傳檔案
+        if (uploadFiles && uploadFiles.length > 0) {
             Path uploadPath = Paths.get(UPLOAD_DIR)
             if (!Files.exists(uploadPath)) {
                 Files.createDirectories(uploadPath)
@@ -54,14 +68,13 @@ class AnnouncementService {
                     String fileName = System.currentTimeMillis() + "_" + file.originalFilename
                     Path filePath = uploadPath.resolve(fileName)
                     Files.copy(file.inputStream, filePath)
-
                     Attachment attachment = new Attachment(
                             fileName: fileName,
                             filePath: "/uploads/" + fileName,
-                            announcement: announcement
+                            announcement: existingAnnouncement
                     )
                     attachmentRepository.save(attachment)
-                    announcement.attachments << attachment
+                    existingAnnouncement.attachments << attachment
                 }
             }
         }
