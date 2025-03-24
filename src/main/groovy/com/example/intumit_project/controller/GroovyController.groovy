@@ -42,8 +42,10 @@ public class AnnouncementController {
     String insert(@ModelAttribute Announcement announcement,
                   @RequestParam("attachments") MultipartFile[] attachments,
                   Model model) {
+        // 先保存公告（不含附件）
         announcementRepository.save(announcement);
 
+        // 處理檔案上傳
         if (attachments != null && attachments.length > 0) {
             Path uploadPath = Paths.get(UPLOAD_DIR);
             try {
@@ -52,12 +54,14 @@ public class AnnouncementController {
                 }
                 for (MultipartFile attachment : attachments) {
                     if (!attachment.isEmpty()) {
-                        String fileName = System.currentTimeMillis() + "_" + attachment.getOriginalFilename(); // 避免檔案名衝突
+                        String fileName = System.currentTimeMillis() + "_" + attachment.getOriginalFilename();
                         Path filePath = uploadPath.resolve(fileName);
                         Files.copy(attachment.getInputStream(), filePath);
+
+                        // 創建 Attachment 實體並關聯到公告
                         Attachment attach = new Attachment();
                         attach.setFileName(fileName);
-                        attach.setFilePath("/uploads/" + fileName); // URL 路徑仍以 /uploads 開頭
+                        attach.setFilePath("/uploads/" + fileName);
                         attach.setAnnouncement(announcement);
                         attachmentRepository.save(attach);
                         announcement.getAttachments().add(attach);
@@ -84,6 +88,10 @@ public class AnnouncementController {
     String update(@ModelAttribute Announcement announcement,
                   @RequestParam("attachments") MultipartFile[] attachments,
                   Model model) {
+        // 更新公告基本資訊
+        announcementRepository.save(announcement);
+
+        // 處理新上傳的附件
         if (attachments != null && attachments.length > 0) {
             Path uploadPath = Paths.get(UPLOAD_DIR);
             try {
@@ -95,6 +103,7 @@ public class AnnouncementController {
                         String fileName = System.currentTimeMillis() + "_" + attachment.getOriginalFilename();
                         Path filePath = uploadPath.resolve(fileName);
                         Files.copy(attachment.getInputStream(), filePath);
+
                         Attachment attach = new Attachment();
                         attach.setFileName(fileName);
                         attach.setFilePath("/uploads/" + fileName);
@@ -109,7 +118,6 @@ public class AnnouncementController {
                 return "errorPage";
             }
         }
-        announcementRepository.save(announcement);
         return "redirect:/index";
     }
 
