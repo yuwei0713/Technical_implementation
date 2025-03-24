@@ -40,31 +40,34 @@ public class AnnouncementController {
 
     @PostMapping("/insert")
     String insert(@ModelAttribute Announcement announcement,
-                  @RequestParam(value = "attachments", required = false) MultipartFile[] attachments,
+                  @RequestParam(value = "uploadFiles", required = false) MultipartFile[] uploadFiles,
                   Model model) {
         // 先保存公告（不含附件）
         announcementRepository.save(announcement);
 
         // 處理檔案上傳
-        if (attachments != null && attachments.length > 0) {
+        if (uploadFiles != null && uploadFiles.length > 0) {
             Path uploadPath = Paths.get(UPLOAD_DIR);
             try {
                 if (!Files.exists(uploadPath)) {
                     Files.createDirectories(uploadPath);
                 }
-                for (MultipartFile attachment : attachments) {
-                    if (!attachment.isEmpty()) {
-                        String fileName = System.currentTimeMillis() + "_" + attachment.getOriginalFilename();
+                for (MultipartFile file : uploadFiles) {
+                    if (!file.isEmpty()) {
+                        String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
                         Path filePath = uploadPath.resolve(fileName);
-                        Files.copy(attachment.getInputStream(), filePath);
+                        Files.copy(file.getInputStream(), filePath);
 
-                        // 創建並保存 Attachment
-                        Attachment attach = new Attachment();
-                        attach.setFileName(fileName);
-                        attach.setFilePath("/uploads/" + fileName);
-                        attach.setAnnouncement(announcement);
-                        attachmentRepository.save(attach);
-                        announcement.getAttachments().add(attach);
+                        Attachment attachment = new Attachment();
+                        attachment.setFileName(fileName);
+                        attachment.setFilePath("/uploads/" + fileName);
+                        attachment.setAnnouncement(announcement);
+                        attachmentRepository.save(attachment);
+
+                        if (announcement.getAttachments() == null) {
+                            announcement.setAttachments(new ArrayList<>());
+                        }
+                        announcement.getAttachments().add(attachment);
                     }
                 }
             } catch (Exception e) {
@@ -85,31 +88,33 @@ public class AnnouncementController {
     }
 
     @PostMapping("/Update")
-    String update(@ModelAttribute Announcement announcement,
-                  @RequestParam(value = "attachments", required = false) MultipartFile[] attachments,
-                  Model model) {
-        // 更新公告基本資訊
+    public String update(@ModelAttribute Announcement announcement,
+                         @RequestParam(value = "uploadFiles", required = false) MultipartFile[] uploadFiles,
+                         Model model) {
         announcementRepository.save(announcement);
 
-        // 處理新上傳的附件
-        if (attachments != null && attachments.length > 0) {
+        if (uploadFiles != null && uploadFiles.length > 0) {
             Path uploadPath = Paths.get(UPLOAD_DIR);
             try {
                 if (!Files.exists(uploadPath)) {
                     Files.createDirectories(uploadPath);
                 }
-                for (MultipartFile attachment : attachments) {
-                    if (!attachment.isEmpty()) {
-                        String fileName = System.currentTimeMillis() + "_" + attachment.getOriginalFilename();
+                for (MultipartFile file : uploadFiles) {
+                    if (!file.isEmpty()) {
+                        String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
                         Path filePath = uploadPath.resolve(fileName);
-                        Files.copy(attachment.getInputStream(), filePath);
+                        Files.copy(file.getInputStream(), filePath);
 
-                        Attachment attach = new Attachment();
-                        attach.setFileName(fileName);
-                        attach.setFilePath("/uploads/" + fileName);
-                        attach.setAnnouncement(announcement);
-                        attachmentRepository.save(attach);
-                        announcement.getAttachments().add(attach);
+                        Attachment attachment = new Attachment();
+                        attachment.setFileName(fileName);
+                        attachment.setFilePath("/uploads/" + fileName);
+                        attachment.setAnnouncement(announcement);
+                        attachmentRepository.save(attachment);
+
+                        if (announcement.getAttachments() == null) {
+                            announcement.setAttachments(new ArrayList<>());
+                        }
+                        announcement.getAttachments().add(attachment);
                     }
                 }
             } catch (Exception e) {

@@ -63,8 +63,8 @@
             <textarea class="form-control" id="content" name="content"></textarea>
         </div>
         <div class="mb-3">
-            <label for="attachments" class="form-label">上傳附件（可選，可多選）</label>
-            <input type="file" class="form-control" id="attachments" name="attachments" multiple>
+            <label for="uploadFiles" class="form-label">Upload New Attachments (Optional, Multiple Allowed)</label>
+            <input type="file" class="form-control" id="uploadFiles" name="uploadFiles" multiple>
         </div>
         <div id="fileList" class="mb-3"></div>
         <button type="submit" class="btn btn-success">確認新增</button>
@@ -79,7 +79,7 @@
         CKEDITOR.replace('content');
     };
 
-    const fileInput = document.getElementById('attachments');
+    const fileInput = document.getElementById('uploadFiles');
     const fileList = document.getElementById('fileList');
 
     fileInput.addEventListener('change', function() {
