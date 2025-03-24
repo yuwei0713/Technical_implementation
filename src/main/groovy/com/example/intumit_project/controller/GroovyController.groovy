@@ -37,9 +37,11 @@ class AnnouncementController {
     @GetMapping("/edit/{id}")
     String showEditForm(@PathVariable("id") Long id, Model model) {
         def announcement = announcementService.findAnnouncementById(id)
+        println "Announcement: ${announcement}"
         if (!announcement) {
             throw new IllegalArgumentException("無效的公告 ID: ${id}")
         }
+        println "Attachments: ${announcement.attachments}"
         model.addAttribute("announcement", announcement)
         "edit"
     }
