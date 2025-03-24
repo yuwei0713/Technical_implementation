@@ -20,11 +20,11 @@
     </div>
     <div class="mb-3">
       <label for="publishDate" class="form-label">發佈日期</label>
-      <input type="date" class="form-control" id="publishDate" name="publishDate" th:value="${#dates.format(announcement.publishDate, 'yyyy-MM-dd')}" required>
+      <input type="date" class="form-control" id="publishDate" name="publishDate" th:value="${announcement.publishDate}" required>
     </div>
     <div class="mb-3">
       <label for="deadline" class="form-label">截止日期</label>
-      <input type="date" class="form-control" id="deadline" name="deadline" th:value="${#dates.format(announcement.deadline, 'yyyy-MM-dd')}" required>
+      <input type="date" class="form-control" id="deadline" name="deadline" th:value="${announcement.deadline}" required>
     </div>
     <div class="mb-3">
       <label for="content" class="form-label">公布內容</label>
