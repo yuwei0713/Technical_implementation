@@ -27,11 +27,11 @@ class AnnouncementController {
                   @RequestParam(value = "uploadFiles", required = false) MultipartFile[] uploadFiles,
                   Model model) {
         try {
-            announcementService.saveAnnouncement(announcement, uploadFiles)
-            "redirect:/index"
+            announcementService.saveAnnouncement(announcement, uploadFiles) // 新增公告
+            return "redirect:/index"
         } catch (Exception e) {
             model.addAttribute("error", e)
-            "errorPage"
+            return "errorPage"
         }
     }
 
