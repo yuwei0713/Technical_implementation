@@ -26,36 +26,49 @@ class AnnouncementService {
 
     @Transactional
     void saveAnnouncement(Announcement formAnnouncement, MultipartFile[] uploadFiles, List<Long> attachmentsToDelete = []) {
-        // 從資料庫加載現有實體
-        def existingAnnouncement = announcementRepository.findById(formAnnouncement.id)
-        if (!existingAnnouncement) {
-            throw new IllegalArgumentException("公告 ID ${formAnnouncement.id} 不存在")
+        Announcement announcementToSave
+
+        // 判斷是新增還是更新
+        if (formAnnouncement.id) {
+            // 更新現有公告
+            announcementToSave = announcementRepository.findById(formAnnouncement.id)
+            if (!announcementToSave) {
+                throw new IllegalArgumentException("公告 ID ${formAnnouncement.id} 不存在")
+            }
+            // 合併表單資料
+            announcementToSave.title = formAnnouncement.title
+            announcementToSave.publisher = formAnnouncement.publisher
+            announcementToSave.publishDate = formAnnouncement.publishDate
+            announcementToSave.deadline = formAnnouncement.deadline
+            announcementToSave.content = formAnnouncement.content
+        } else {
+            // 新增公告
+            announcementToSave = new Announcement(
+                    title: formAnnouncement.title,
+                    publisher: formAnnouncement.publisher,
+                    publishDate: formAnnouncement.publishDate,
+                    deadline: formAnnouncement.deadline,
+                    content: formAnnouncement.content
+            )
         }
 
-        // 合併表單資料到現有實體
-        existingAnnouncement.title = formAnnouncement.title
-        existingAnnouncement.publisher = formAnnouncement.publisher
-        existingAnnouncement.publishDate = formAnnouncement.publishDate
-        existingAnnouncement.deadline = formAnnouncement.deadline
-        existingAnnouncement.content = formAnnouncement.content
-
-        // 刪除舊附件
-        if (attachmentsToDelete) {
+        // 刪除舊附件（僅更新時適用）
+        if (formAnnouncement.id && attachmentsToDelete) {
             attachmentsToDelete.each { attachmentId ->
                 def attachment = attachmentRepository.findById(attachmentId)
-                if (attachment && attachment.announcement.id == existingAnnouncement.id) {
+                if (attachment && attachment.announcement.id == announcementToSave.id) {
                     Path filePath = Paths.get(UPLOAD_DIR + attachment.fileName)
                     if (Files.exists(filePath)) {
                         Files.delete(filePath)
                     }
                     attachmentRepository.deleteById(attachmentId)
-                    existingAnnouncement.attachments.removeAll { it.id == attachmentId }
+                    announcementToSave.attachments.removeAll { it.id == attachmentId }
                 }
             }
         }
 
-        // 更新公告
-        announcementRepository.save(existingAnnouncement)
+        // 保存公告（新增或更新）
+        announcementRepository.save(announcementToSave)
 
         // 處理新上傳檔案
         if (uploadFiles && uploadFiles.length > 0) {
@@ -71,10 +84,13 @@ class AnnouncementService {
                     Attachment attachment = new Attachment(
                             fileName: fileName,
                             filePath: "/uploads/" + fileName,
-                            announcement: existingAnnouncement
+                            announcement: announcementToSave
                     )
                     attachmentRepository.save(attachment)
-                    existingAnnouncement.attachments << attachment
+                    if (!announcementToSave.attachments) {
+                        announcementToSave.attachments = []
+                    }
+                    announcementToSave.attachments << attachment
                 }
             }
         }
